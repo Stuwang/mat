@@ -1,5 +1,7 @@
+TARGET=main.out
+
 all:
-	clang++ main.cpp -o main -O2 -std=c++11
+	clang++ main.cpp -o $(TARGET) -O2 -std=c++11 -g
 
 clean:
-	rm main *.o -rf
+	rm $(TARGET) *.o -rf

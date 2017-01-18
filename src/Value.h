@@ -47,6 +47,8 @@ namespace mat{
 
     };
 
+	~Object(){};
+
     Value& operator[](const std::string & name) {
       return data_[name];
     };
@@ -75,6 +77,38 @@ namespace mat{
   private:
     std::map<std::string, Value> data_;
   };
+  
+  class Array {
+  public:
+    typedef Value value_type;
+    typedef value_type* pointer;
+    typedef const value_type* const_pointer;
+    typedef value_type& reference;
+    typedef const value_type& const_reference;
+    //struct iterator{
+
+    //};
+
+    typedef Value* iterator;
+    typedef const Value* const_iterator;
+
+    Array(){};
+    Array(std::size_t size){};
+	~Array(){};
+    iterator begin(){ return &*(data_.begin()); };
+    iterator end(){ return &*(data_.end()); };
+    const_iterator cbegin()const{ return &*(data_.cbegin()); };
+    const_iterator cend() const{ return &*(data_.cend()); };
+
+    void push_back(const Value& value){ data_.push_back(value); };
+    // iterator erase(iterator i){
+    //   int len = i - begin();
+    //   return &*(data_.erase(data_.cbegin() + len));
+    // };
+  private:
+    std::vector<Value> data_;
+  };
+
 
 
   enum class ValueFlag :int {
@@ -113,40 +147,9 @@ namespace mat{
     return typemsg[value];
   };
 
-  class Array {
-  public:
-    typedef Value value_type;
-    typedef value_type* pointer;
-    typedef const value_type* const_pointer;
-    typedef value_type& reference;
-    typedef const value_type& const_reference;
-    //struct iterator{
-
-    //};
-
-    typedef Value* iterator;
-    typedef const Value* const_iterator;
-
-    Array(){};
-    Array(std::size_t size){};
-    iterator begin(){ return &*(data_.begin()); };
-    iterator end(){ return &*(data_.end()); };
-    const_iterator cbegin()const{ return &*(data_.cbegin()); };
-    const_iterator cend() const{ return &*(data_.cend()); };
-
-    void push_back(const Value& value){ data_.push_back(value); };
-    // iterator erase(iterator i){
-    //   int len = i - begin();
-    //   return &*(data_.erase(data_.cbegin() + len));
-    // };
-  private:
-    std::vector<Value> data_;
-  };
-
   class Value {
   public:
-    Value(){SetFlag(ValueFlag::None);};
-    explicit Value(std::nullptr_t){ SetFlag(ValueFlag::None); };
+    explicit Value(std::nullptr_t = nullptr){ SetFlag(ValueFlag::None); };
     explicit Value(float value){ SetFlag(ValueFlag::Float); Set(value); };
     explicit Value(double value){ SetFlag(ValueFlag::Double); Set(value); };
     explicit Value(int32_t value){ SetFlag(ValueFlag::Int32); Set(value); };
@@ -157,9 +160,9 @@ namespace mat{
     explicit Value(uint16_t value){ SetFlag(ValueFlag::Uint16); Set(value); };
     explicit Value(int8_t value){ SetFlag(ValueFlag::Int8); Set(value); };
     explicit Value(uint8_t value){ SetFlag(ValueFlag::Uint8); Set(value); };
-    explicit Value(const std::string& value){ SetFlag(ValueFlag::String); SetString(value); };
-    explicit Value(const Array& arr){ SetFlag(ValueFlag::Array);SetArray(arr) ; };
-    explicit Value(const Object& obj){ SetFlag(ValueFlag::Object); SetObject(obj); };
+    explicit Value(const std::string& value){ SetFlag(ValueFlag::None); SetString(value); };
+    explicit Value(const Array& arr){ SetArray(arr) ; };
+    explicit Value(const Object& obj){ SetObject(obj); };
 
     bool IsDouble() const{ return flag_ == ValueFlag::Double; };
     bool IsFloat() const{ return flag_ == ValueFlag::Float; };
@@ -171,6 +174,9 @@ namespace mat{
     bool IsUint16() const{ return flag_ == ValueFlag::Uint16; };
     bool IsInt8() const{ return flag_ == ValueFlag::Int8; };
     bool IsUint8() const{ return flag_ == ValueFlag::Uint8; };
+	bool IsArray() const{ return flag_ == ValueFlag::Array; };
+	bool IsObject() const { return flag_ == ValueFlag::Object; };
+	bool IsString() const { return flag_ == ValueFlag::String; };
 
     bool IsNumeric() const{
       return IsFloat() || IsDouble() ||
@@ -272,60 +278,92 @@ namespace mat{
       Clear();
       new (&Get<std::string>()) std::string();
       this->Get<std::string>() = value;
+	  SetFlag(ValueFlag::String);
     }
 
     void SetObject(const Object& obj){
       Clear();
-      this->Get<Object>() = obj;
+      this->Get<Object*>() = new Object(obj);
     }
 
     void SetArray(const Array& arr){
       Clear();
-      this->Get<Array>() = arr;
+      this->Get<Array*>() = new Array(arr);
     }
 
     void Clear(){
+	  typedef std::string StringType;
       switch (flag_)
       {
       case ValueFlag::Array:
-        reinterpret_cast<Array*>(data_)->~Array();
+		{
+			Array* p = *reinterpret_cast<Array**>(data_);
+			p->~Array();
+			delete p;
+		}
         break;
       case ValueFlag::Object:
-        reinterpret_cast<Object*>(data_)->~Object();
+		{
+			Object * obj = *reinterpret_cast<Object**>(data_);
+			obj->~Object();
+			delete obj;
+		}
         break;
       case ValueFlag::String:
-        std::_Destroy(reinterpret_cast<std::string*>(data_));
-        //(*reinterpret_cast<std::string*>(data_)).~std::string();
+		{
+			std::string * str = reinterpret_cast<std::string*>(data_);
+			//std::cout << *str << std::endl;
+			str->~StringType();
+			//std::_Destroy(reinterpret_cast<std::string&>(data_));
+		}
         break;
       default:
         break;
       }
+	  flag_ = ValueFlag::None;
     };
 
     Value(const Value& v){
-      this->flag_ = v.flag_;
-      switch (this->flag_)
+      switch (v.flag_)
       {
+	  case ValueFlag::Array:
+		  SetArray(v.GetArray());
+		  break;
+	  case ValueFlag::Object:
+		  SetObject(v.GetObject());
+		  break;
+	  case ValueFlag::String:
+		  SetString(v.GetString());
+		  break;
       default:
         break;
       }
+      this->flag_ = v.flag_;
     };
 
     Value& operator=(const Value& v){
       this->Clear();
-      this->flag_ = v.flag_;
-      switch (this->flag_)
+      switch (v.flag_)
       {
+	  case ValueFlag::Array:
+		  SetArray(v.GetArray());
+		  break;
+	  case ValueFlag::Object:
+		  SetObject(v.GetObject());
+		  break;
+	  case ValueFlag::String:
+		  SetString(v.GetString());
+		  break;
       default:
         break;
       }
+      this->flag_ = v.flag_;
       return *this;
     };
 
     ~Value(){
       Clear();
     }
-
 
   private:
     template<class T>
@@ -341,7 +379,7 @@ namespace mat{
     template<class T>
     void Set(T value){
       Get<T>() = value;
-    }
+    };
 
     void SetFlag(ValueFlag f){
       flag_ = f;
@@ -352,11 +390,12 @@ namespace mat{
     static const int m_size = MaxOf<
       sizeof(uint64_t), 
       sizeof(std::string), 
-      sizeof(Object), 
-      sizeof(Array)
+      sizeof(Object*), 
+      sizeof(Array*)
     >::value;
     unsigned char data_[m_size];
   };
+
 };
 
 #endif
