@@ -44,11 +44,9 @@ namespace mat
 
   class Object{
   public:
-    Object(){
 
-    };
-
-    ~Object(){};
+    typedef std::map<std::string, Value>::iterator iterator;
+    typedef std::map<std::string, Value>::const_iterator const_iterator;
 
     Value& operator[](const std::string & name) {
       return data_[name];
@@ -70,10 +68,25 @@ namespace mat
       data_.erase(name);
     }
 
-    // void AddField(const std::string &name, const Value& value){
-    //   data_.insert(name,value);
-    // }
+    iterator begin(){
+      return data_.begin();
+    }
 
+    iterator end(){
+      return data_.end();
+    }
+
+    const_iterator cbegin()const {
+      return data_.cbegin();
+    }
+
+    const_iterator cend()const{
+      return data_.cend(); 
+    }
+
+    size_t size() const {
+      return data_.size();
+    }
 
   private:
     std::map<std::string, Value> data_;
@@ -86,9 +99,6 @@ namespace mat
     typedef const value_type* const_pointer;
     typedef value_type& reference;
     typedef const value_type& const_reference;
-    //struct iterator{
-
-    //};
 
     typedef std::vector<Value>::iterator iterator;
     typedef std::vector<Value>::const_iterator const_iterator;
@@ -103,10 +113,12 @@ namespace mat
     const_iterator cend() const{ return (data_.cend()); };
 
     void push_back(const Value& value){ data_.push_back(value); };
-    // iterator erase(iterator i){
-    //   int len = i - begin();
-    //   return &*(data_.erase(data_.cbegin() + len));
-    // };
+    iterator insert(const_iterator i, const Value& value){
+      return data_.insert(i, value);
+    }
+    size_t size()const {
+      return data_.size();
+    }
   private:
     std::vector<Value> data_;
   };
@@ -143,7 +155,10 @@ namespace mat
       "Int32",
       "Uint32",
       "Int64",
-      "Uint64"
+      "Uint64",
+      "String",
+      "Array",
+      "Object"
     };
     assert(value < ARRAY_SIZE(typemsg));
     return typemsg[value];
@@ -284,6 +299,10 @@ namespace mat
     DEFINE_SET(uint64_t, Uint64);
 
 #undef DEFINE_SET
+
+    ValueFlag GetFlag()const {
+      return flag_;
+    }
 
     void SetString(const std::string& value){
       Clear();
