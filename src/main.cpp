@@ -2,6 +2,7 @@
 
 #include "Value.h"
 
+<<<<<<< HEAD
 std::ostream& operator << (std::ostream& os, const mat::Value& v){
   switch ( v.GetFlag() )
   {
@@ -137,4 +138,32 @@ int main(){
   TestObject();
   std::cout << "==============美丽的分割线=============" << std::endl;
   getchar();
+=======
+int main(){
+  {
+	  mat::Value value;
+	  value.SetInt32(12);
+	  std::cout << value.GetInt32() << std::endl;
+
+	  value.SetString("hahahhah");
+	  mat::Value b = value;
+      std::cout << "fuck!!" << std::endl;
+	  std::cout << value.GetString() << std::endl; 
+  }
+  std::cout << "fuck!!" << std::endl;
+  
+  mat::Array arr;
+  arr.push_back(mat::Value(1));
+  arr.push_back(mat::Value("111111111111111"));
+  for(auto it: arr){
+	auto i = &it;
+	if(i->IsInt32()){
+		std::cout << i->GetInt32() << std::endl;
+	}else if(i->IsString()){
+		std::cout << i->GetString() << std::endl;
+	}else{
+		std::cout << "other type !" << std::endl;
+	}
+  }
+>>>>>>> f69b2fa98c1a9e381b3f2b8ea094f38b5c78aa87
 }
