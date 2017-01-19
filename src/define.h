@@ -9,7 +9,6 @@ inline char(&_ArraySizeHelper(T(&data)[N]))[N]{
 #define ARRAY_SIZE(arr)\
   sizeof(_ArraySizeHelper(arr))
 
-<<<<<<< HEAD
 template<class T>
 void DoZero(T* const data){
   memset(data, sizeof(T), 0);
@@ -26,8 +25,5 @@ void DoCopy(T(&dst)[dst_size], const T(&src)[src_size]){
   memcpy(static_cast<void*>(&dst), 
     static_cast<const void*>(&src), sizeof(T)*src_size);
 }
-
-=======
->>>>>>> f69b2fa98c1a9e381b3f2b8ea094f38b5c78aa87
 
 #endif
