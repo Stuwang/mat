@@ -89,6 +89,10 @@ namespace mat
       return data_.size();
     }
 
+    bool hasMember(const std::string& name) const {
+      return data_.find(name) != data_.end();
+    }
+
   private:
     std::map<std::string, Value> data_;
   };
@@ -119,6 +123,16 @@ namespace mat
     }
     size_t size()const {
       return data_.size();
+    }
+    const Value& operator[](int index) const {
+      assert(index >= 0);
+      assert(index < size());
+      return data_[index];
+    }
+    Value& operator[](int index) {
+      assert(index >= 0);
+      assert(static_cast<size_t>(index) < size());
+      return data_[index];
     }
   private:
     std::vector<Value> data_;
@@ -327,24 +341,24 @@ namespace mat
       {
       case ValueFlag::Array:
       {
-                             Array* p = *reinterpret_cast<Array**>(data_);
-                             p->~Array();
-                             delete p;
+          Array* p = *reinterpret_cast<Array**>(data_);
+          p->~Array();
+          delete p;
       }
       break;
       case ValueFlag::Object:
       {
-                              Object * obj = *reinterpret_cast<Object**>(data_);
-                              obj->~Object();
-                              delete obj;
+          Object * obj = *reinterpret_cast<Object**>(data_);
+          obj->~Object();
+          delete obj;
       }
       break;
       case ValueFlag::String:
       {
-                              std::string * str = reinterpret_cast<std::string*>(data_);
-                              //std::cout << *str << std::endl;
-                              str->~StringType();
-                              //std::_Destroy(reinterpret_cast<std::string&>(data_));
+          std::string * str = reinterpret_cast<std::string*>(data_);
+          //std::cout << *str << std::endl;
+          str->~StringType();
+          //std::_Destroy(reinterpret_cast<std::string&>(data_));
       }
       break;
       default:
