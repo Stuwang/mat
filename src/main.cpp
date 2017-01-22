@@ -69,8 +69,7 @@ void TestValue(){
     TEST_M(uint32_t, Uint32);
     TEST_M(uint64_t, Uint64);
 
-    do
-    {
+    do{
       mat::Value v("bbb");
       assert(v.GetString() == "bbb");
       v.SetString("aaa");
@@ -128,8 +127,6 @@ void TestObject(){
 }
 
 int main(){
-  
-  
   TestArray();
   std::cout << "==============美丽的分割线=============" << std::endl;
   TestValue();
