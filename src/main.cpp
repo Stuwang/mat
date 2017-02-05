@@ -37,7 +37,7 @@ std::ostream& operator << (std::ostream& os, const mat::Value& v){
   }
   return os;
 }
-
+#if 1
 void TestValue(){
 
 #define TEST_M(type,flag)\
@@ -110,6 +110,7 @@ void TestArray(){
   assert(arr2.size() == 2);
   mat::Array arr3(arr2);
 }
+#endif
 
 void TestObject(){
   mat::Object obj;
@@ -126,12 +127,13 @@ void TestObject(){
   }
 }
 
+
 int main(){
   TestArray();
-  std::cout << "==============美丽的分割线=============" << std::endl;
+  std::cout << "==============缇庝附鐨勫垎鍓茬嚎=============" << std::endl;
   TestValue();
-  std::cout << "==============美丽的分割线=============" << std::endl;
+  std::cout << "==============缇庝附鐨勫垎鍓茬嚎=============" << std::endl;
   TestObject();
-  std::cout << "==============美丽的分割线=============" << std::endl;
+  std::cout << "==============缇庝附鐨勫垎鍓茬嚎=============" << std::endl;
   getchar();
 }
