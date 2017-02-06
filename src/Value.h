@@ -415,6 +415,14 @@ public:
         Clear();
     }
 
+	friend bool operator ==(const Value& lv,const Value rv){
+		return true;
+	};
+
+	friend bool operator !=(const Value& lv,const Value rv){
+		return false;
+	};
+
 private:
     template<class T>
     T& Get() {
